@@ -60,6 +60,12 @@ public:
 	int nearThreshold;
 	int farThreshold;
     int count;
+    typedef struct {
+        float x,y;
+    }
+    chefvec;
+    chefvec punkte[1000];
+    int ix;
     
 	
 	int angle;

@@ -40,6 +40,7 @@ void ofApp::setup() {
 	grayThreshFar.allocate(kinect.width, kinect.height);
 	
     count = 0;
+    ix = 0;
 	nearThreshold = 120;
 	farThreshold = 80;
 	bThreshWithOpenCV = true;
@@ -53,6 +54,9 @@ void ofApp::setup() {
 	
 	// start from the front
 	bDrawPointCloud = false;
+    
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -96,6 +100,15 @@ void ofApp::update() {
 		// also, find holes is set to true so we will get interior contours as well....
 		contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
 	}
+    
+    count = count+1;
+    if((count == 240) && (ix<1000)){
+        //ofDrawCircle(300, 300, 10);
+        punkte[ix].x = contourFinder.blobs[0].centroid.x;
+        punkte[ix].y = contourFinder.blobs[0].centroid.y;
+        ix++;
+        count =0;
+    }
 	
 #ifdef USE_TWO_KINECTS
 	kinect2.update();
@@ -114,25 +127,25 @@ void ofApp::draw() {
 		easyCam.end();
 	} else {
 		// draw from the live kinect
-		kinect.drawDepth(550, 150, 500, 400);
+		//kinect.drawDepth(550, 150, 500, 400);
 		//kinect.draw(420, 10, 400, 300);
 		
-		grayImage.draw(10, 150, 500, 400);
-		contourFinder.draw(10, 150, 500, 400);
+		grayImage.draw(0, 0, 1024, 768);
+		contourFinder.draw(0, 0, 1024, 768);
 
-            
         }
-    
     //PUNKT ZEICHNEN TEEEEEST
-    count = count+1;
-    if(count == 600){
-        ofDrawCircle(300, 300, 50);
+    for (int zix=0; zix<ix; zix++){
+        ofSetColor(0, 255, 0);
+        ofDrawCircle(punkte[zix].x/kinect.width*1024,punkte[zix].y/kinect.height*768 , 10);
+    }
+        
         
         
 #ifdef USE_TWO_KINECTS
 		kinect2.draw(420, 320, 400, 300);
 #endif
-	}
+	
 	
 	// draw instructions
 	ofSetColor(255, 255, 255);
@@ -164,8 +177,8 @@ void ofApp::draw() {
 }
 
 void ofApp::drawPointCloud() {
-	int w = 640;
-	int h = 480;
+	int w = 1024;
+	int h = 768;
 	ofMesh mesh;
 	mesh.setMode(OF_PRIMITIVE_POINTS);
 	int step = 2;
