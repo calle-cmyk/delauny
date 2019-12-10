@@ -179,7 +179,7 @@ void ofxCvContourFinder::draw( float x, float y, float w, float h ) const {
 
 	//ofNoFill();
 	for( int i=0; i<(int)blobs.size(); i++ ) {
-		ofDrawCircle( blobs[0].centroid.x, blobs[0].centroid.y, 10);
+		//ofDrawCircle( blobs[0].centroid.x, blobs[0].centroid.y, 10);
 	}
     
     
