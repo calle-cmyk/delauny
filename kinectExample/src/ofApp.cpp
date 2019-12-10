@@ -40,11 +40,13 @@ void ofApp::setup() {
 	grayThreshFar.allocate(kinect.width, kinect.height);
 	
     count = 0;
+    count1 =0;
     ix = 0;
+    a=1;
+    //b=40;
 	nearThreshold = 120;
 	farThreshold = 80;
 	bThreshWithOpenCV = true;
-    //int count = 0;
 	
 	ofSetFrameRate(60);
 	
@@ -61,8 +63,18 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
+    
+    
+    count1 = count1 + 1;
+    if((count1 >= 10)){
+    color = ofColor( ofRandom(0, 255),
+    ofRandom(0, 255),
+    ofRandom(100, 255)
+    );
+        count1 = 0;
+    }
 	
-	ofBackground(100, 0, 0);
+	ofBackground(0, 0, 0);
 	kinect.update();
 	
 	// there is a new frame and we are connected
@@ -92,7 +104,6 @@ void ofApp::update() {
 				}
 			}
 		}
-		
 		// update the cv images
 		grayImage.flagImageChanged();
 		
@@ -102,14 +113,28 @@ void ofApp::update() {
 	}
     
     count = count+1;
-    if((count == 240) && (ix<1000)){
+    if((count >= 30) && (ix<10000)){
         //ofDrawCircle(300, 300, 10);
+        if(!contourFinder.blobs.empty()){
         punkte[ix].x = contourFinder.blobs[0].centroid.x;
         punkte[ix].y = contourFinder.blobs[0].centroid.y;
+        //
         ix++;
-        count =0;
+        }
     }
-	
+    
+   // count2 = count2+1;
+     //   if((count >= 1000) && (ix<10000)){
+    for(int i=0; i<ix; i++){
+        punkte[i].x= (punkte[i].x-kinect.width/2) * 0.999 +kinect.width/2 ;
+        punkte[i].y= (punkte[i].y-kinect.height/2) * 0.999 +kinect.height/2 ;
+        //a= a *0.5;
+        //b= b*0.999;
+        
+    }
+//        }
+
+    
 #ifdef USE_TWO_KINECTS
 	kinect2.update();
 #endif
@@ -119,7 +144,8 @@ void ofApp::update() {
 
 void ofApp::draw() {
 	
-	ofSetColor(255, 255, 255);
+    
+	ofSetColor(0, 0, 0);
 	
 	if(bDrawPointCloud) {
 		easyCam.begin();
@@ -130,50 +156,26 @@ void ofApp::draw() {
 		//kinect.drawDepth(550, 150, 500, 400);
 		//kinect.draw(420, 10, 400, 300);
 		
+        bool vertical = true;
+        bool horizontal = false;
+        grayImage.mirror(vertical, horizontal);
 		grayImage.draw(0, 0, 1024, 768);
 		contourFinder.draw(0, 0, 1024, 768);
 
         }
-    //PUNKT ZEICHNEN TEEEEEST
+    if(usecamera){
+        camera.begin();
+    }
+    //STRICHE ZEICHNEN
     for (int zix=0; zix<ix; zix++){
-        ofSetColor(0, 255, 0);
-        ofDrawCircle(punkte[zix].x/kinect.width*1024,punkte[zix].y/kinect.height*768 , 10);
+    
+        ofSetColor(color);
+        ofSetLineWidth(a);
+        ofDrawLine(punkte[zix].x/kinect.width*1024,punkte[zix].y/kinect.height*768,punkte[zix].x/kinect.width*1024,punkte[zix].y/kinect.height*768+40);
     }
-        
-        
-        
-#ifdef USE_TWO_KINECTS
-		kinect2.draw(420, 320, 400, 300);
-#endif
-	
-	
-	// draw instructions
-	ofSetColor(255, 255, 255);
-	stringstream reportStream;
-    
-    if(kinect.hasAccelControl()) {
-        reportStream << "accel is: " << ofToString(kinect.getMksAccel().x, 2) << " / "
-        << ofToString(kinect.getMksAccel().y, 2) << " / "
-        << ofToString(kinect.getMksAccel().z, 2) << endl;
-    } else {
-        reportStream << "Note: this is a newer Xbox Kinect or Kinect For Windows device," << endl
-		<< "motor / led / accel controls are not currently supported" << endl << endl;
+    if(usecamera){
+        camera.end();
     }
-    
-	reportStream << "press p to switch between images and point cloud, rotate the point cloud with the mouse" << endl
-	<< "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
-	<< "set near threshold " << nearThreshold << " (press: + -)" << endl
-	<< "set far threshold " << farThreshold << " (press: < >) num blobs found " << contourFinder.nBlobs
-	<< ", fps: " << ofGetFrameRate() << endl
-	<< "press c to close the connection and o to open it again, connection is: " << kinect.isConnected() << endl;
-
-    if(kinect.hasCamTiltControl()) {
-    	reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
-        << "press 1-5 & 0 to change the led mode" << endl;
-    }
-    
-	ofDrawBitmapString(reportStream.str(), 20, 652);
-    
 }
 
 void ofApp::drawPointCloud() {

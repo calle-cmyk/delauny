@@ -60,15 +60,23 @@ public:
 	int nearThreshold;
 	int farThreshold;
     int count;
+    int count1;
+    int count2;
+    int ix;
+    int angle;
+    int a;
+    int zix;
+    
+    ofColor color;
+    ofCamera camera;
+    bool usecamera;
+    
     typedef struct {
         float x,y;
     }
     chefvec;
-    chefvec punkte[1000];
-    int ix;
-    
+    chefvec punkte[10000];
 	
-	int angle;
 	
 	// used for viewing the point cloud
 	ofEasyCam easyCam;
